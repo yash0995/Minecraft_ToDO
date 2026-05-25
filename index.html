@@ -20,7 +20,7 @@
   .app-container {
     max-width:1400px; margin:0 auto; display:flex; gap:16px; flex-wrap:wrap;
   }
-  /* Sidebar – vertical categories */
+  /* Sidebar – vertical categories with animation */
   .sidebar {
     width:220px; background:var(--panel); border:3px solid var(--border); box-shadow:6px 6px 0 #000;
     padding:10px; height:fit-content;
@@ -31,32 +31,50 @@
   .cat-tab {
     background:#1a1a1a; border:2px solid #444; padding:8px 12px;
     font-family:'VT323',monospace; font-size:18px; cursor:pointer; color:#aaa;
-    transition:all 0.1s;
+    transition: all 0.2s ease-in-out;
+    transform-origin: left;
   }
   .cat-tab.active {
     border-color:var(--gold); color:var(--gold); background:#2a2010;
+    box-shadow: 0 0 6px rgba(255,215,0,0.4);
   }
-  .cat-tab:hover:not(.active) { color:var(--text); border-color:#888; }
+  .cat-tab:hover:not(.active) {
+    color:var(--text); border-color:#888;
+    transform: translateX(4px);
+    background: #2a2410;
+  }
 
   /* Main content */
   .main-content { flex:1; min-width:280px; }
-  header { text-align:center; margin-bottom:16px; padding:16px; background:var(--panel); border:4px solid var(--border); box-shadow:6px 6px 0 #000; position:relative; }
+  header { text-align:center; margin-bottom:16px; padding:16px; background:var(--panel); border:4px solid var(--border); box-shadow:6px 6px 0 #000; position:relative; transition: box-shadow 0.2s; }
+  header:hover { box-shadow:8px 8px 0 #000; }
   header::before { content:''; position:absolute; inset:3px; border:2px solid rgba(255,255,255,0.07); pointer-events:none; }
-  h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; }
+  h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; animation: glowPulse 3s infinite; }
+  @keyframes glowPulse {
+    0% { text-shadow: 3px 3px 0 #7a5a00; }
+    50% { text-shadow: 3px 3px 8px #ffcc44; }
+    100% { text-shadow: 3px 3px 0 #7a5a00; }
+  }
   .subtitle { font-size:19px; color:#aaa; margin-top:4px; }
 
   .top-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
-  .top-bar input { flex:1; min-width:150px; background:#111; border:3px solid var(--border); color:var(--text); padding:9px 12px; font-family:'VT323',monospace; font-size:21px; outline:none; }
-  .top-bar input:focus { border-color:var(--gold); }
+  .top-bar input { flex:1; min-width:150px; background:#111; border:3px solid var(--border); color:var(--text); padding:9px 12px; font-family:'VT323',monospace; font-size:21px; outline:none; transition: border 0.2s, box-shadow 0.2s; }
+  .top-bar input:focus { border-color:var(--gold); box-shadow: 0 0 8px rgba(255,215,0,0.5); }
 
   .btn {
     background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010;
     color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer;
     box-shadow:2px 2px 0 #000; white-space:nowrap;
+    transition: all 0.05s linear;
   }
-  .btn:active { transform:translate(2px,2px); box-shadow:none; }
+  .btn:active {
+    transform:translate(2px,2px);
+    box-shadow:none;
+    transition: 0.02s;
+  }
   .btn.gold { background:#8a6200; border-color:#5a4000; }
   .btn.green { background:var(--checked); border-color:#2a5c20; }
+  .btn:hover { filter: brightness(1.1); }
 
   .panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
   .mc-grid {
@@ -65,37 +83,65 @@
   }
   .mc-block {
     background:#1a1408; border:2px solid #333; padding:8px 10px; cursor:pointer;
-    font-family:'VT323',monospace; font-size:18px; color:#bbb; transition:all 0.1s;
+    font-family:'VT323',monospace; font-size:18px; color:#bbb; transition: all 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     display:flex; justify-content:space-between; align-items:center;
+    animation: fadeSlideUp 0.2s ease-out;
   }
-  .mc-block:hover { border-color:var(--gold); color:var(--gold); background:#2a2010; }
-  .mc-block.selected { border-color:var(--grass); color:#8fdf5a; background:#0f200d; }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .mc-block:hover {
+    border-color:var(--gold); color:var(--gold); background:#2a2010;
+    transform: scale(1.02);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .mc-block.selected {
+    border-color:var(--grass); color:#8fdf5a; background:#0f200d;
+    transform: scale(1.01);
+  }
   .mc-block .badge { background:var(--grass); color:#000; font-size:13px; padding:1px 5px; min-width:18px; text-align:center; display:none; }
-  .mc-block.selected .badge { display:inline-block; }
+  .mc-block.selected .badge { display:inline-block; animation: popBadge 0.2s ease; }
+  @keyframes popBadge {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
   /* Bottom tray */
   .tray {
     position:fixed; bottom:0; left:0; right:0; background:#1a1208; border-top:3px solid var(--border);
     padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; z-index:100;
-    box-shadow:0 -4px 0 #000;
+    box-shadow:0 -4px 0 #000; transition: background 0.2s;
   }
   .tray-info { font-size:20px; color:#aaa; flex:1; }
-  .tray-info span { color:var(--gold); font-size:22px; }
+  .tray-info span { color:var(--gold); font-size:22px; transition: text-shadow 0.1s; }
   .qty-wrap { display:flex; align-items:center; gap:6px; }
   .qty-wrap label { font-size:18px; color:#aaa; }
   .qty-wrap input {
     width:80px; background:#111; border:2px solid var(--border); color:var(--gold);
     padding:7px 8px; font-family:'VT323',monospace; font-size:20px; outline:none; text-align:center;
+    transition: border 0.2s, box-shadow 0.2s;
   }
+  .qty-wrap input:focus { border-color:var(--gold); box-shadow: 0 0 5px gold; }
   .fab {
     position:fixed; top:16px; right:16px; z-index:200;
   }
   .empty { color:#555; font-size:20px; padding:20px; text-align:center; grid-column:1/-1; }
 
+  @keyframes buttonFlash {
+    0% { background: var(--checked); transform: scale(1); }
+    50% { background: #6f9e3a; transform: scale(1.05); }
+    100% { background: var(--checked); transform: scale(1); }
+  }
+  .btn-flash {
+    animation: buttonFlash 0.3s ease;
+  }
+
   @media (max-width:700px) {
     .app-container { flex-direction:column; }
     .sidebar { width:100%; }
     .cat-list { flex-direction:row; flex-wrap:wrap; }
+    .cat-tab:hover:not(.active) { transform: translateY(-2px); }
   }
 </style>
 </head>
@@ -130,7 +176,7 @@
     <label>QTY:</label>
     <input type="number" id="qty" value="64" min="1" max="99999">
   </div>
-  <button class="btn green" onclick="addToList()">＋ ADD TO LIST</button>
+  <button class="btn green" id="addBtn">＋ ADD TO LIST</button>
 </div>
 
 <script>
@@ -224,7 +270,7 @@ const MC_ITEMS = {
     "Jack o'Lantern","End Rod","Shroomlight","Beacon","Conduit",
     "Ochre Froglight","Verdant Froglight","Pearlescent Froglight","Glow Lichen",
   ],
-  "📦 Storage":[
+   "📦 Storage":[
     "Chest","Trapped Chest","Ender Chest","Barrel","Shulker Box",
     "White Shulker Box","Orange Shulker Box","Magenta Shulker Box","Light Blue Shulker Box","Yellow Shulker Box","Lime Shulker Box","Pink Shulker Box","Gray Shulker Box","Light Gray Shulker Box","Cyan Shulker Box","Purple Shulker Box","Blue Shulker Box","Brown Shulker Box","Green Shulker Box","Red Shulker Box","Black Shulker Box",
     "Furnace","Blast Furnace","Smoker","Campfire","Soul Campfire",
@@ -240,7 +286,7 @@ const MC_ITEMS = {
     "Sponge","Wet Sponge","Prismarine","Prismarine Bricks","Dark Prismarine","Sea Lantern",
     "Ancient Debris","Nether Gold Ore","Nether Quartz Ore",
   ],
- "⛏️ Ores":[
+  "⛏️ Ores":[
     "Coal Ore","Deepslate Coal Ore","Iron Ore","Deepslate Iron Ore","Copper Ore","Deepslate Copper Ore",
     "Gold Ore","Deepslate Gold Ore","Redstone Ore","Deepslate Redstone Ore","Lapis Lazuli Ore","Deepslate Lapis Lazuli Ore",
     "Diamond Ore","Deepslate Diamond Ore","Emerald Ore","Deepslate Emerald Ore",
@@ -265,14 +311,18 @@ function renderCats() {
   ).join('');
 }
 
-function setCat(cat) { currentCat = cat; renderCats(); renderGrid(); }
+function setCat(cat) { 
+  currentCat = cat; 
+  renderCats(); 
+  renderGrid(true); // true = animate grid refresh
+}
 
-function renderGrid() {
+function renderGrid(animate = false) {
   const q = document.getElementById('search').value.toLowerCase();
   let items = MC_ITEMS[currentCat] || [];
   if(q) items = items.filter(n => n.toLowerCase().includes(q));
   const list = getList();
-  document.getElementById('mc-grid').innerHTML = items.length
+  const gridHtml = items.length
     ? items.map(name => {
         const inList = list.find(i => i.name === name);
         const isSel = selected === name;
@@ -282,6 +332,18 @@ function renderGrid() {
         </div>`;
       }).join('')
     : '<div class="empty">No results found.</div>';
+  
+  const container = document.getElementById('mc-grid');
+  if (animate) {
+    container.style.opacity = '0';
+    setTimeout(() => {
+      container.innerHTML = gridHtml;
+      container.style.transition = 'opacity 0.15s';
+      container.style.opacity = '1';
+    }, 80);
+  } else {
+    container.innerHTML = gridHtml;
+  }
 }
 
 function selectItem(name) {
@@ -306,9 +368,15 @@ function addToList() {
   saveList(list);
   updateFab();
   renderGrid();
-  const btn = document.querySelector('.btn.green');
+  
+  // Animate add button
+  const btn = document.getElementById('addBtn');
+  btn.classList.add('btn-flash');
   btn.textContent = '✔ ADDED!';
-  setTimeout(() => { btn.textContent = '＋ ADD TO LIST'; }, 1000);
+  setTimeout(() => { 
+    btn.textContent = '＋ ADD TO LIST';
+    btn.classList.remove('btn-flash');
+  }, 800);
 }
 
 function updateFab() {
@@ -324,4 +392,4 @@ renderGrid();
 updateFab();
 </script>
 </body>
-</html>
+</html> 
