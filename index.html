@@ -17,7 +17,29 @@
       repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(0,0,0,0.3) 31px,rgba(0,0,0,0.3) 32px);
     background-size:32px 32px; min-height:100vh; font-family:'VT323',monospace; color:var(--text); padding:16px;
   }
-  .container { max-width:960px; margin:0 auto; }
+  .app-container {
+    max-width:1400px; margin:0 auto; display:flex; gap:16px; flex-wrap:wrap;
+  }
+  /* Sidebar – vertical categories */
+  .sidebar {
+    width:220px; background:var(--panel); border:3px solid var(--border); box-shadow:6px 6px 0 #000;
+    padding:10px; height:fit-content;
+  }
+  .cat-list {
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .cat-tab {
+    background:#1a1a1a; border:2px solid #444; padding:8px 12px;
+    font-family:'VT323',monospace; font-size:18px; cursor:pointer; color:#aaa;
+    transition:all 0.1s;
+  }
+  .cat-tab.active {
+    border-color:var(--gold); color:var(--gold); background:#2a2010;
+  }
+  .cat-tab:hover:not(.active) { color:var(--text); border-color:#888; }
+
+  /* Main content */
+  .main-content { flex:1; min-width:280px; }
   header { text-align:center; margin-bottom:16px; padding:16px; background:var(--panel); border:4px solid var(--border); box-shadow:6px 6px 0 #000; position:relative; }
   header::before { content:''; position:absolute; inset:3px; border:2px solid rgba(255,255,255,0.07); pointer-events:none; }
   h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; }
@@ -27,41 +49,54 @@
   .top-bar input { flex:1; min-width:150px; background:#111; border:3px solid var(--border); color:var(--text); padding:9px 12px; font-family:'VT323',monospace; font-size:21px; outline:none; }
   .top-bar input:focus { border-color:var(--gold); }
 
-  .btn { background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010; color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer; box-shadow:2px 2px 0 #000; white-space:nowrap; }
+  .btn {
+    background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010;
+    color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer;
+    box-shadow:2px 2px 0 #000; white-space:nowrap;
+  }
   .btn:active { transform:translate(2px,2px); box-shadow:none; }
   .btn.gold { background:#8a6200; border-color:#5a4000; }
   .btn.green { background:var(--checked); border-color:#2a5c20; }
 
-  .cat-row { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; }
-  .cat-tab { background:#1a1a1a; border:2px solid #444; padding:5px 10px; font-family:'VT323',monospace; font-size:17px; cursor:pointer; color:#aaa; }
-  .cat-tab.active { border-color:var(--gold); color:var(--gold); background:#2a2010; }
-  .cat-tab:hover:not(.active) { color:var(--text); border-color:#888; }
-
   .panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
-
-  .mc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:5px; max-height:55vh; overflow-y:auto; }
-  .mc-block { background:#1a1408; border:2px solid #333; padding:8px 10px; cursor:pointer; font-family:'VT323',monospace; font-size:18px; color:#bbb; transition:all 0.1s; display:flex; justify-content:space-between; align-items:center; }
+  .mc-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:5px;
+    max-height:55vh; overflow-y:auto;
+  }
+  .mc-block {
+    background:#1a1408; border:2px solid #333; padding:8px 10px; cursor:pointer;
+    font-family:'VT323',monospace; font-size:18px; color:#bbb; transition:all 0.1s;
+    display:flex; justify-content:space-between; align-items:center;
+  }
   .mc-block:hover { border-color:var(--gold); color:var(--gold); background:#2a2010; }
   .mc-block.selected { border-color:var(--grass); color:#8fdf5a; background:#0f200d; }
   .mc-block .badge { background:var(--grass); color:#000; font-size:13px; padding:1px 5px; min-width:18px; text-align:center; display:none; }
   .mc-block.selected .badge { display:inline-block; }
 
   /* Bottom tray */
-  .tray { position:fixed; bottom:0; left:0; right:0; background:#1a1208; border-top:3px solid var(--border); padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; z-index:100; box-shadow:0 -4px 0 #000; }
+  .tray {
+    position:fixed; bottom:0; left:0; right:0; background:#1a1208; border-top:3px solid var(--border);
+    padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; z-index:100;
+    box-shadow:0 -4px 0 #000;
+  }
   .tray-info { font-size:20px; color:#aaa; flex:1; }
   .tray-info span { color:var(--gold); font-size:22px; }
   .qty-wrap { display:flex; align-items:center; gap:6px; }
   .qty-wrap label { font-size:18px; color:#aaa; }
-  .qty-wrap input { width:80px; background:#111; border:2px solid var(--border); color:var(--gold); padding:7px 8px; font-family:'VT323',monospace; font-size:20px; outline:none; text-align:center; }
-  .qty-wrap input:focus { border-color:var(--gold); }
-  .selected-label { font-size:19px; color:var(--gold); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
+  .qty-wrap input {
+    width:80px; background:#111; border:2px solid var(--border); color:var(--gold);
+    padding:7px 8px; font-family:'VT323',monospace; font-size:20px; outline:none; text-align:center;
+  }
+  .fab {
+    position:fixed; top:16px; right:16px; z-index:200;
+  }
   .empty { color:#555; font-size:20px; padding:20px; text-align:center; grid-column:1/-1; }
 
-  /* Floating view list btn */
-  .fab { position:fixed; top:16px; right:16px; z-index:200; }
-
-  @media(max-width:480px) { .mc-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); } }
+  @media (max-width:700px) {
+    .app-container { flex-direction:column; }
+    .sidebar { width:100%; }
+    .cat-list { flex-direction:row; flex-wrap:wrap; }
+  }
 </style>
 </head>
 <body>
@@ -69,21 +104,22 @@
   <button class="btn gold" onclick="openTodo()">📋 VIEW LIST (<span id="fab-count">0</span>)</button>
 </div>
 
-<div class="container">
-  <header>
-    <h1>⛏ MINECRAFT ITEM SELECTOR</h1>
-    <div class="subtitle">Pick items → set quantity → add to your list</div>
-  </header>
-
-  <div class="top-bar">
-    <input id="search" placeholder="Search any Minecraft item..." oninput="renderGrid()">
-    <button class="btn" onclick="clearSearch()">✕ Clear</button>
+<div class="app-container">
+  <div class="sidebar">
+    <div class="cat-list" id="cat-row"></div>
   </div>
-
-  <div class="cat-row" id="cat-row"></div>
-
-  <div class="panel">
-    <div class="mc-grid" id="mc-grid"></div>
+  <div class="main-content">
+    <header>
+      <h1>⛏ MINECRAFT SELECTOR</h1>
+      <div class="subtitle">Pick items → set quantity → add to your list</div>
+    </header>
+    <div class="top-bar">
+      <input id="search" placeholder="Search any Minecraft item..." oninput="renderGrid()">
+      <button class="btn" onclick="clearSearch()">✕ Clear</button>
+    </div>
+    <div class="panel">
+      <div class="mc-grid" id="mc-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -104,8 +140,7 @@ const MC_ITEMS = {
     "Stone","Cobblestone","Stone Bricks","Cracked Stone Bricks","Mossy Stone Bricks","Chiseled Stone Bricks","Smooth Stone",
     "Granite","Polished Granite","Diorite","Polished Diorite","Andesite","Polished Andesite",
     "Deepslate","Cobbled Deepslate","Polished Deepslate","Chiseled Deepslate","Deepslate Bricks","Cracked Deepslate Bricks","Deepslate Tiles","Cracked Deepslate Tiles","Reinforced Deepslate",
-    "Calcite","Tuff","Tuff Bricks","Chiseled Tuff","Polished Tuff",
-    "Obsidian","Crying Obsidian","Basalt","Polished Basalt","Smooth Basalt",
+    "Calcite","Tuff","Tuff Bricks","Chiseled Tuff","Polished Tuff","Obsidian","Crying Obsidian","Basalt","Polished Basalt","Smooth Basalt",
     "Blackstone","Polished Blackstone","Chiseled Polished Blackstone","Gilded Blackstone","Polished Blackstone Bricks","Cracked Polished Blackstone Bricks",
     "Netherrack","Nether Bricks","Red Nether Bricks","Chiseled Nether Bricks","Cracked Nether Bricks",
     "End Stone","End Stone Bricks","Purpur Block","Purpur Pillar",
@@ -120,8 +155,7 @@ const MC_ITEMS = {
     "Stripped Oak Log","Stripped Spruce Log","Stripped Birch Log","Stripped Jungle Log","Stripped Acacia Log","Stripped Dark Oak Log","Stripped Mangrove Log","Stripped Cherry Log","Stripped Pale Oak Log",
     "Oak Wood","Spruce Wood","Birch Wood","Jungle Wood","Acacia Wood","Dark Oak Wood","Mangrove Wood","Cherry Wood","Pale Oak Wood",
     "Oak Planks","Spruce Planks","Birch Planks","Jungle Planks","Acacia Planks","Dark Oak Planks","Mangrove Planks","Cherry Planks","Pale Oak Planks","Bamboo Planks",
-    "Bamboo Block","Stripped Bamboo Block",
-    "Oak Sign","Spruce Sign","Birch Sign","Jungle Sign","Acacia Sign","Dark Oak Sign","Mangrove Sign","Cherry Sign","Pale Oak Sign","Bamboo Sign",
+    "Bamboo Block","Stripped Bamboo Block","Oak Sign","Spruce Sign","Birch Sign","Jungle Sign","Acacia Sign","Dark Oak Sign","Mangrove Sign","Cherry Sign","Pale Oak Sign","Bamboo Sign",
     "Oak Hanging Sign","Spruce Hanging Sign","Birch Hanging Sign","Jungle Hanging Sign","Acacia Hanging Sign","Dark Oak Hanging Sign","Mangrove Hanging Sign","Cherry Hanging Sign","Pale Oak Hanging Sign","Bamboo Hanging Sign","Crimson Hanging Sign","Warped Hanging Sign",
   ],
   "🚪 Doors & Slabs":[
@@ -206,7 +240,7 @@ const MC_ITEMS = {
     "Sponge","Wet Sponge","Prismarine","Prismarine Bricks","Dark Prismarine","Sea Lantern",
     "Ancient Debris","Nether Gold Ore","Nether Quartz Ore",
   ],
-  "⛏️ Ores":[
+ "⛏️ Ores":[
     "Coal Ore","Deepslate Coal Ore","Iron Ore","Deepslate Iron Ore","Copper Ore","Deepslate Copper Ore",
     "Gold Ore","Deepslate Gold Ore","Redstone Ore","Deepslate Redstone Ore","Lapis Lazuli Ore","Deepslate Lapis Lazuli Ore",
     "Diamond Ore","Deepslate Diamond Ore","Emerald Ore","Deepslate Emerald Ore",
@@ -268,11 +302,10 @@ function addToList() {
   const list = getList();
   const existing = list.find(i => i.name === selected);
   if(existing) { existing.qty += qty; }
-  else { list.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2), name: selected, qty }); }
+  else { list.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2), name: selected, qty, collected: false }); }
   saveList(list);
   updateFab();
   renderGrid();
-  // Flash feedback
   const btn = document.querySelector('.btn.green');
   btn.textContent = '✔ ADDED!';
   setTimeout(() => { btn.textContent = '＋ ADD TO LIST'; }, 1000);
