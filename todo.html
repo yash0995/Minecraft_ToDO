@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minecraft Item Selector</title>
+<title>Your Minecraft List</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
   :root {
     --wood:#A0722A; --panel:#2d2416; --panel2:#3a2e1a; --border:#6b4f2a;
     --text:#F5DEB3; --checked:#4a7c3f; --gold:#FFD700; --grass:#5D9E3A;
+    --danger:#9e2a2a;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -23,271 +24,178 @@
   h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; }
   .subtitle { font-size:19px; color:#aaa; margin-top:4px; }
 
-  .top-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
-  .top-bar input { flex:1; min-width:150px; background:#111; border:3px solid var(--border); color:var(--text); padding:9px 12px; font-family:'VT323',monospace; font-size:21px; outline:none; }
-  .top-bar input:focus { border-color:var(--gold); }
-
-  .btn { background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010; color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer; box-shadow:2px 2px 0 #000; white-space:nowrap; }
+  .top-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; justify-content: space-between; }
+  .btn {
+    background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010;
+    color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer;
+    box-shadow:2px 2px 0 #000; white-space:nowrap; text-decoration: none; display: inline-block;
+  }
   .btn:active { transform:translate(2px,2px); box-shadow:none; }
   .btn.gold { background:#8a6200; border-color:#5a4000; }
   .btn.green { background:var(--checked); border-color:#2a5c20; }
+  .btn.danger { background:var(--danger); border-color:#5a1a1a; }
 
-  .cat-row { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; }
-  .cat-tab { background:#1a1a1a; border:2px solid #444; padding:5px 10px; font-family:'VT323',monospace; font-size:17px; cursor:pointer; color:#aaa; }
-  .cat-tab.active { border-color:var(--gold); color:var(--gold); background:#2a2010; }
-  .cat-tab:hover:not(.active) { color:var(--text); border-color:#888; }
-
-  .panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
-
-  .mc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:5px; max-height:55vh; overflow-y:auto; }
-  .mc-block { background:#1a1408; border:2px solid #333; padding:8px 10px; cursor:pointer; font-family:'VT323',monospace; font-size:18px; color:#bbb; transition:all 0.1s; display:flex; justify-content:space-between; align-items:center; }
-  .mc-block:hover { border-color:var(--gold); color:var(--gold); background:#2a2010; }
-  .mc-block.selected { border-color:var(--grass); color:#8fdf5a; background:#0f200d; }
-  .mc-block .badge { background:var(--grass); color:#000; font-size:13px; padding:1px 5px; min-width:18px; text-align:center; display:none; }
-  .mc-block.selected .badge { display:inline-block; }
-
-  /* Bottom tray */
-  .tray { position:fixed; bottom:0; left:0; right:0; background:#1a1208; border-top:3px solid var(--border); padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; z-index:100; box-shadow:0 -4px 0 #000; }
-  .tray-info { font-size:20px; color:#aaa; flex:1; }
-  .tray-info span { color:var(--gold); font-size:22px; }
-  .qty-wrap { display:flex; align-items:center; gap:6px; }
-  .qty-wrap label { font-size:18px; color:#aaa; }
-  .qty-wrap input { width:80px; background:#111; border:2px solid var(--border); color:var(--gold); padding:7px 8px; font-family:'VT323',monospace; font-size:20px; outline:none; text-align:center; }
-  .qty-wrap input:focus { border-color:var(--gold); }
-  .selected-label { font-size:19px; color:var(--gold); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-  .empty { color:#555; font-size:20px; padding:20px; text-align:center; grid-column:1/-1; }
-
-  /* Floating view list btn */
-  .fab { position:fixed; top:16px; right:16px; z-index:200; }
-
-  @media(max-width:480px) { .mc-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); } }
+  .list-panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
+  .list-header {
+    display: grid; grid-template-columns: 3fr 1fr 0.5fr; gap: 8px; padding: 8px 12px;
+    background: #1a1208; border-bottom: 2px solid var(--border); font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: var(--gold); margin-bottom: 8px;
+  }
+  .list-item {
+    display: grid; grid-template-columns: 3fr 1fr 0.5fr; gap: 8px; align-items: center;
+    background: #1a1408; border: 1px solid #333; padding: 10px 12px; margin-bottom: 4px;
+    font-size: 20px;
+  }
+  .item-name { color: var(--text); word-break: break-word; }
+  .item-qty { display: flex; gap: 6px; align-items: center; justify-content: center; }
+  .item-qty input { width: 70px; background:#111; border:2px solid var(--border); color:var(--gold);
+    padding: 5px; font-family:'VT323',monospace; font-size: 18px; text-align: center; }
+  .item-qty button, .item-delete button {
+    background: #2a2a1a; border: 2px solid #5a5a3a; color: #ddd; font-size: 14px; font-weight: bold;
+    cursor: pointer; padding: 4px 8px; font-family: monospace;
+  }
+  .item-delete button { background: #4a1a1a; border-color: #7a2a2a; }
+  .empty-list { text-align: center; padding: 40px; font-size: 24px; color: #666; }
+  .list-summary {
+    margin-top: 16px; padding: 12px; background: #1a1208; border: 2px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    font-size: 20px;
+  }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  @media (max-width: 550px) {
+    .list-header, .list-item { grid-template-columns: 2fr 1.2fr 0.8fr; gap: 6px; }
+    .item-qty input { width: 55px; font-size: 16px; }
+  }
 </style>
 </head>
 <body>
-<div class="fab">
-  <button class="btn gold" onclick="openTodo()">📋 VIEW LIST (<span id="fab-count">0</span>)</button>
-</div>
 
 <div class="container">
   <header>
-    <h1>⛏ MINECRAFT ITEM SELECTOR</h1>
-    <div class="subtitle">Pick items → set quantity → add to your list</div>
+    <h1>📦 YOUR MINECRAFT LIST</h1>
+    <div class="subtitle">Manage your collected items</div>
   </header>
 
   <div class="top-bar">
-    <input id="search" placeholder="Search any Minecraft item..." oninput="renderGrid()">
-    <button class="btn" onclick="clearSearch()">✕ Clear</button>
+    <button class="btn gold" onclick="goBack()">◀ BACK TO SELECTOR</button>
+    <button class="btn danger" onclick="clearAll()">🗑 CLEAR ALL</button>
   </div>
 
-  <div class="cat-row" id="cat-row"></div>
-
-  <div class="panel">
-    <div class="mc-grid" id="mc-grid"></div>
+  <div class="list-panel">
+    <div class="list-header">
+      <div>ITEM</div>
+      <div>QUANTITY</div>
+      <div>ACTION</div>
+    </div>
+    <div id="list-container"></div>
   </div>
-</div>
 
-<!-- BOTTOM TRAY -->
-<div class="tray">
-  <div class="tray-info">Selected: <span id="tray-name">—</span></div>
-  <div class="qty-wrap">
-    <label>QTY:</label>
-    <input type="number" id="qty" value="64" min="1" max="99999">
-  </div>
-  <button class="btn green" onclick="addToList()">＋ ADD TO LIST</button>
+  <div class="list-summary" id="list-summary"></div>
 </div>
 
 <script>
-const MC_ITEMS = {
-  "⭐ All":[],
-  "🪨 Stone":[
-    "Stone","Cobblestone","Stone Bricks","Cracked Stone Bricks","Mossy Stone Bricks","Chiseled Stone Bricks","Smooth Stone",
-    "Granite","Polished Granite","Diorite","Polished Diorite","Andesite","Polished Andesite",
-    "Deepslate","Cobbled Deepslate","Polished Deepslate","Chiseled Deepslate","Deepslate Bricks","Cracked Deepslate Bricks","Deepslate Tiles","Cracked Deepslate Tiles","Reinforced Deepslate",
-    "Calcite","Tuff","Tuff Bricks","Chiseled Tuff","Polished Tuff",
-    "Obsidian","Crying Obsidian","Basalt","Polished Basalt","Smooth Basalt",
-    "Blackstone","Polished Blackstone","Chiseled Polished Blackstone","Gilded Blackstone","Polished Blackstone Bricks","Cracked Polished Blackstone Bricks",
-    "Netherrack","Nether Bricks","Red Nether Bricks","Chiseled Nether Bricks","Cracked Nether Bricks",
-    "End Stone","End Stone Bricks","Purpur Block","Purpur Pillar",
-    "Sandstone","Smooth Sandstone","Chiseled Sandstone","Cut Sandstone","Red Sandstone","Smooth Red Sandstone","Chiseled Red Sandstone","Cut Red Sandstone",
-    "Prismarine","Prismarine Bricks","Dark Prismarine","Gravel","Sand","Red Sand","Magma Block","Soul Sand","Soul Soil","Glowstone",
-    "Cobblestone Wall","Mossy Cobblestone Wall","Stone Brick Wall","Mossy Stone Brick Wall","Andesite Wall","Diorite Wall","Granite Wall",
-    "Sandstone Wall","Red Sandstone Wall","Brick Wall","Prismarine Wall","Deepslate Brick Wall","Deepslate Tile Wall","Cobbled Deepslate Wall","Polished Deepslate Wall",
-    "Tuff Wall","Tuff Brick Wall","Polished Tuff Wall","Blackstone Wall","Polished Blackstone Wall","Polished Blackstone Brick Wall","Nether Brick Wall","Red Nether Brick Wall","End Stone Brick Wall","Mud Brick Wall",
-  ],
-  "🌲 Wood":[
-    "Oak Log","Spruce Log","Birch Log","Jungle Log","Acacia Log","Dark Oak Log","Mangrove Log","Cherry Log","Pale Oak Log",
-    "Stripped Oak Log","Stripped Spruce Log","Stripped Birch Log","Stripped Jungle Log","Stripped Acacia Log","Stripped Dark Oak Log","Stripped Mangrove Log","Stripped Cherry Log","Stripped Pale Oak Log",
-    "Oak Wood","Spruce Wood","Birch Wood","Jungle Wood","Acacia Wood","Dark Oak Wood","Mangrove Wood","Cherry Wood","Pale Oak Wood",
-    "Oak Planks","Spruce Planks","Birch Planks","Jungle Planks","Acacia Planks","Dark Oak Planks","Mangrove Planks","Cherry Planks","Pale Oak Planks","Bamboo Planks",
-    "Bamboo Block","Stripped Bamboo Block",
-    "Oak Sign","Spruce Sign","Birch Sign","Jungle Sign","Acacia Sign","Dark Oak Sign","Mangrove Sign","Cherry Sign","Pale Oak Sign","Bamboo Sign",
-    "Oak Hanging Sign","Spruce Hanging Sign","Birch Hanging Sign","Jungle Hanging Sign","Acacia Hanging Sign","Dark Oak Hanging Sign","Mangrove Hanging Sign","Cherry Hanging Sign","Pale Oak Hanging Sign","Bamboo Hanging Sign","Crimson Hanging Sign","Warped Hanging Sign",
-  ],
-  "🚪 Doors & Slabs":[
-    "Oak Slab","Spruce Slab","Birch Slab","Jungle Slab","Acacia Slab","Dark Oak Slab","Mangrove Slab","Cherry Slab","Pale Oak Slab","Bamboo Slab",
-    "Stone Slab","Smooth Stone Slab","Stone Brick Slab","Cobblestone Slab","Sandstone Slab","Red Sandstone Slab","Brick Slab",
-    "Granite Slab","Polished Granite Slab","Diorite Slab","Polished Diorite Slab","Andesite Slab","Polished Andesite Slab",
-    "Deepslate Brick Slab","Deepslate Tile Slab","Cobbled Deepslate Slab","Polished Deepslate Slab","Tuff Slab","Tuff Brick Slab","Polished Tuff Slab",
-    "Prismarine Slab","Prismarine Brick Slab","Dark Prismarine Slab","Nether Brick Slab","Quartz Slab","Smooth Quartz Slab","Purpur Slab","End Stone Brick Slab",
-    "Blackstone Slab","Polished Blackstone Slab","Polished Blackstone Brick Slab","Cut Copper Slab","Waxed Cut Copper Slab","Mud Brick Slab",
-    "Oak Stairs","Spruce Stairs","Birch Stairs","Jungle Stairs","Acacia Stairs","Dark Oak Stairs","Mangrove Stairs","Cherry Stairs","Pale Oak Stairs","Bamboo Stairs",
-    "Stone Stairs","Stone Brick Stairs","Cobblestone Stairs","Sandstone Stairs","Red Sandstone Stairs","Brick Stairs","Granite Stairs","Polished Granite Stairs","Diorite Stairs","Polished Diorite Stairs","Andesite Stairs","Polished Andesite Stairs",
-    "Deepslate Brick Stairs","Deepslate Tile Stairs","Cobbled Deepslate Stairs","Polished Deepslate Stairs","Tuff Stairs","Tuff Brick Stairs","Polished Tuff Stairs",
-    "Prismarine Stairs","Prismarine Brick Stairs","Dark Prismarine Stairs","Nether Brick Stairs","Quartz Stairs","Smooth Quartz Stairs","Purpur Stairs","End Stone Brick Stairs",
-    "Blackstone Stairs","Polished Blackstone Stairs","Polished Blackstone Brick Stairs","Cut Copper Stairs","Waxed Cut Copper Stairs","Mud Brick Stairs",
-    "Oak Door","Spruce Door","Birch Door","Jungle Door","Acacia Door","Dark Oak Door","Mangrove Door","Cherry Door","Pale Oak Door","Bamboo Door","Iron Door",
-    "Oak Trapdoor","Spruce Trapdoor","Birch Trapdoor","Jungle Trapdoor","Acacia Trapdoor","Dark Oak Trapdoor","Mangrove Trapdoor","Cherry Trapdoor","Pale Oak Trapdoor","Bamboo Trapdoor","Iron Trapdoor",
-    "Oak Fence","Spruce Fence","Birch Fence","Jungle Fence","Acacia Fence","Dark Oak Fence","Mangrove Fence","Cherry Fence","Pale Oak Fence","Bamboo Fence","Nether Brick Fence",
-    "Oak Fence Gate","Spruce Fence Gate","Birch Fence Gate","Jungle Fence Gate","Acacia Fence Gate","Dark Oak Fence Gate","Mangrove Fence Gate","Cherry Fence Gate","Pale Oak Fence Gate","Bamboo Fence Gate",
-  ],
-  "🏗️ Building":[
-    "Bricks","Mud Bricks","Packed Mud","Clay","Terracotta",
-    "White Terracotta","Orange Terracotta","Magenta Terracotta","Light Blue Terracotta","Yellow Terracotta","Lime Terracotta","Pink Terracotta","Gray Terracotta","Light Gray Terracotta","Cyan Terracotta","Purple Terracotta","Blue Terracotta","Brown Terracotta","Green Terracotta","Red Terracotta","Black Terracotta",
-    "White Concrete","Orange Concrete","Magenta Concrete","Light Blue Concrete","Yellow Concrete","Lime Concrete","Pink Concrete","Gray Concrete","Light Gray Concrete","Cyan Concrete","Purple Concrete","Blue Concrete","Brown Concrete","Green Concrete","Red Concrete","Black Concrete",
-    "White Concrete Powder","Orange Concrete Powder","Magenta Concrete Powder","Light Blue Concrete Powder","Yellow Concrete Powder","Lime Concrete Powder","Pink Concrete Powder","Gray Concrete Powder","Light Gray Concrete Powder","Cyan Concrete Powder","Purple Concrete Powder","Blue Concrete Powder","Brown Concrete Powder","Green Concrete Powder","Red Concrete Powder","Black Concrete Powder",
-    "Sponge","Wet Sponge","Hay Bale","Bone Block","Coal Block","Iron Block","Gold Block","Diamond Block","Emerald Block","Netherite Block","Redstone Block","Lapis Block","Amethyst Block",
-    "Copper Block","Exposed Copper","Weathered Copper","Oxidized Copper","Waxed Copper Block","Cut Copper","Exposed Cut Copper","Weathered Cut Copper","Oxidized Cut Copper",
-    "Quartz Block","Smooth Quartz","Chiseled Quartz Block","Quartz Pillar","Quartz Bricks",
-    "Packed Ice","Blue Ice","Ice","Snow Block","Powder Snow","Suspicious Sand","Suspicious Gravel",
-    "White Glazed Terracotta","Orange Glazed Terracotta","Magenta Glazed Terracotta","Light Blue Glazed Terracotta","Yellow Glazed Terracotta","Lime Glazed Terracotta","Pink Glazed Terracotta","Gray Glazed Terracotta","Light Gray Glazed Terracotta","Cyan Glazed Terracotta","Purple Glazed Terracotta","Blue Glazed Terracotta","Brown Glazed Terracotta","Green Glazed Terracotta","Red Glazed Terracotta","Black Glazed Terracotta",
-  ],
-  "🍃 Nature":[
-    "Grass Block","Dirt","Coarse Dirt","Rooted Dirt","Podzol","Mycelium","Mud","Muddy Mangrove Roots","Mangrove Roots",
-    "Oak Leaves","Spruce Leaves","Birch Leaves","Jungle Leaves","Acacia Leaves","Dark Oak Leaves","Mangrove Leaves","Cherry Leaves","Pale Oak Leaves","Azalea Leaves","Flowering Azalea Leaves",
-    "Moss Block","Moss Carpet","Fern","Large Fern","Grass","Tall Grass","Dead Bush","Vine","Azalea","Flowering Azalea","Spore Blossom","Big Dripleaf","Small Dripleaf","Glow Lichen",
-    "Dandelion","Poppy","Blue Orchid","Allium","Azure Bluet","Red Tulip","Orange Tulip","White Tulip","Pink Tulip","Oxeye Daisy","Cornflower","Lily of the Valley","Wither Rose","Sunflower","Lilac","Rose Bush","Peony","Pitcher Plant","Torchflower","Open Eyeblossom","Closed Eyeblossom",
-    "Lily Pad","Cactus","Sugar Cane","Bamboo","Kelp","Sea Pickle",
-    "Crimson Fungus","Warped Fungus","Crimson Nylium","Warped Nylium","Nether Sprouts","Crimson Roots","Warped Roots","Crimson Stem","Warped Stem","Stripped Crimson Stem","Stripped Warped Stem","Nether Wart Block","Warped Wart Block","Shroomlight",
-    "Sculk","Sculk Vein","Sculk Catalyst","Sculk Shrieker","Sculk Sensor","Calibrated Sculk Sensor",
-    "Mushroom (Brown)","Mushroom (Red)","Brown Mushroom Block","Red Mushroom Block","Mushroom Stem",
-  ],
-  "🪟 Glass & Wool":[
-    "Glass","Glass Pane","Tinted Glass",
-    "White Stained Glass","Orange Stained Glass","Magenta Stained Glass","Light Blue Stained Glass","Yellow Stained Glass","Lime Stained Glass","Pink Stained Glass","Gray Stained Glass","Light Gray Stained Glass","Cyan Stained Glass","Purple Stained Glass","Blue Stained Glass","Brown Stained Glass","Green Stained Glass","Red Stained Glass","Black Stained Glass",
-    "White Stained Glass Pane","Orange Stained Glass Pane","Magenta Stained Glass Pane","Light Blue Stained Glass Pane","Yellow Stained Glass Pane","Lime Stained Glass Pane","Pink Stained Glass Pane","Gray Stained Glass Pane","Light Gray Stained Glass Pane","Cyan Stained Glass Pane","Purple Stained Glass Pane","Blue Stained Glass Pane","Brown Stained Glass Pane","Green Stained Glass Pane","Red Stained Glass Pane","Black Stained Glass Pane",
-    "White Wool","Orange Wool","Magenta Wool","Light Blue Wool","Yellow Wool","Lime Wool","Pink Wool","Gray Wool","Light Gray Wool","Cyan Wool","Purple Wool","Blue Wool","Brown Wool","Green Wool","Red Wool","Black Wool",
-    "White Carpet","Orange Carpet","Magenta Carpet","Light Blue Carpet","Yellow Carpet","Lime Carpet","Pink Carpet","Gray Carpet","Light Gray Carpet","Cyan Carpet","Purple Carpet","Blue Carpet","Brown Carpet","Green Carpet","Red Carpet","Black Carpet",
-    "White Banner","Orange Banner","Magenta Banner","Light Blue Banner","Yellow Banner","Lime Banner","Pink Banner","Gray Banner","Light Gray Banner","Cyan Banner","Purple Banner","Blue Banner","Brown Banner","Green Banner","Red Banner","Black Banner",
-    "White Bed","Orange Bed","Magenta Bed","Light Blue Bed","Yellow Bed","Lime Bed","Pink Bed","Gray Bed","Light Gray Bed","Cyan Bed","Purple Bed","Blue Bed","Brown Bed","Green Bed","Red Bed","Black Bed",
-  ],
-  "🎨 Decoration":[
-    "Candle","White Candle","Orange Candle","Magenta Candle","Light Blue Candle","Yellow Candle","Lime Candle","Pink Candle","Gray Candle","Light Gray Candle","Cyan Candle","Purple Candle","Blue Candle","Brown Candle","Green Candle","Red Candle","Black Candle",
-    "Flower Pot","Painting","Item Frame","Glow Item Frame","Armor Stand","Decorated Pot","Cobweb",
-    "Chain","Iron Bars","Bell","Lantern","Soul Lantern",
-    "Amethyst Cluster","Large Amethyst Bud","Medium Amethyst Bud","Small Amethyst Bud",
-    "Bookshelf","Chiseled Bookshelf","Lectern","Scaffolding","Ladder",
-  ],
-  "⚙️ Redstone":[
-    "Redstone Torch","Redstone Lamp","Redstone Block","Redstone Repeater","Redstone Comparator",
-    "Lever","Stone Button","Oak Button","Spruce Button","Birch Button","Jungle Button","Acacia Button","Dark Oak Button","Mangrove Button","Cherry Button","Pale Oak Button","Bamboo Button","Polished Blackstone Button",
-    "Stone Pressure Plate","Oak Pressure Plate","Spruce Pressure Plate","Birch Pressure Plate","Jungle Pressure Plate","Acacia Pressure Plate","Dark Oak Pressure Plate","Mangrove Pressure Plate","Cherry Pressure Plate","Pale Oak Pressure Plate","Bamboo Pressure Plate","Polished Blackstone Pressure Plate","Light Weighted Pressure Plate","Heavy Weighted Pressure Plate",
-    "Piston","Sticky Piston","Dispenser","Dropper","Observer","Hopper","Daylight Detector","TNT","Tripwire Hook","Target Block","Lightning Rod",
-    "Rail","Powered Rail","Detector Rail","Activator Rail",
-  ],
-  "🔦 Lighting":[
-    "Torch","Soul Torch","Glowstone","Redstone Lamp","Sea Lantern","Lantern","Soul Lantern",
-    "Jack o'Lantern","End Rod","Shroomlight","Beacon","Conduit",
-    "Ochre Froglight","Verdant Froglight","Pearlescent Froglight","Glow Lichen",
-  ],
-  "📦 Storage":[
-    "Chest","Trapped Chest","Ender Chest","Barrel","Shulker Box",
-    "White Shulker Box","Orange Shulker Box","Magenta Shulker Box","Light Blue Shulker Box","Yellow Shulker Box","Lime Shulker Box","Pink Shulker Box","Gray Shulker Box","Light Gray Shulker Box","Cyan Shulker Box","Purple Shulker Box","Blue Shulker Box","Brown Shulker Box","Green Shulker Box","Red Shulker Box","Black Shulker Box",
-    "Furnace","Blast Furnace","Smoker","Campfire","Soul Campfire",
-    "Crafting Table","Anvil","Chipped Anvil","Damaged Anvil","Grindstone","Smithing Table","Stonecutter","Loom","Cartography Table","Fletcher Table","Composter","Cauldron",
-    "Enchanting Table","Brewing Stand","Beehive","Bee Nest","Jukebox","Note Block","Vault","Trial Spawner",
-    "Minecart","Minecart with Chest","Minecart with Hopper","Minecart with TNT",
-  ],
-  "🌊 Ocean & Nether":[
-    "Tube Coral Block","Brain Coral Block","Bubble Coral Block","Fire Coral Block","Horn Coral Block",
-    "Dead Tube Coral Block","Dead Brain Coral Block","Dead Bubble Coral Block","Dead Fire Coral Block","Dead Horn Coral Block",
-    "Tube Coral Fan","Brain Coral Fan","Bubble Coral Fan","Fire Coral Fan","Horn Coral Fan",
-    "Dead Tube Coral Fan","Dead Brain Coral Fan","Dead Bubble Coral Fan","Dead Fire Coral Fan","Dead Horn Coral Fan",
-    "Sponge","Wet Sponge","Prismarine","Prismarine Bricks","Dark Prismarine","Sea Lantern",
-    "Ancient Debris","Nether Gold Ore","Nether Quartz Ore",
-  ],
-  "⛏️ Ores":[
-    "Coal Ore","Deepslate Coal Ore","Iron Ore","Deepslate Iron Ore","Copper Ore","Deepslate Copper Ore",
-    "Gold Ore","Deepslate Gold Ore","Redstone Ore","Deepslate Redstone Ore","Lapis Lazuli Ore","Deepslate Lapis Lazuli Ore",
-    "Diamond Ore","Deepslate Diamond Ore","Emerald Ore","Deepslate Emerald Ore",
-    "Raw Iron Block","Raw Copper Block","Raw Gold Block",
-  ],
-};
+  // Helper functions (same storage key as index.html)
+  function getList() { return JSON.parse(localStorage.getItem('mc-todo-v3') || '[]'); }
+  function saveList(list) { localStorage.setItem('mc-todo-v3', JSON.stringify(list)); }
 
-// Build All
-const allItems = [];
-Object.entries(MC_ITEMS).forEach(([cat,arr]) => { if(cat!=="⭐ All") allItems.push(...arr); });
-MC_ITEMS["⭐ All"] = [...new Set(allItems)].sort();
+  // Render the list
+  function renderTodoList() {
+    const list = getList();
+    const container = document.getElementById('list-container');
+    const summaryDiv = document.getElementById('list-summary');
 
-let selected = null;
-let currentCat = "⭐ All";
+    if (!list.length) {
+      container.innerHTML = '<div class="empty-list">⛏ No items added yet. Go back and select some!</div>';
+      summaryDiv.innerHTML = '<span>Total distinct items: 0</span><span>Total quantity: 0</span>';
+      return;
+    }
 
-function getList() { return JSON.parse(localStorage.getItem('mc-todo-v3') || '[]'); }
-function saveList(list) { localStorage.setItem('mc-todo-v3', JSON.stringify(list)); }
+    // Sort alphabetically by name
+    const sorted = [...list].sort((a,b) => a.name.localeCompare(b.name));
 
-function renderCats() {
-  document.getElementById('cat-row').innerHTML = Object.keys(MC_ITEMS).map(c =>
-    `<div class="cat-tab${c===currentCat?' active':''}" onclick='setCat(${JSON.stringify(c)})'>${c}</div>`
-  ).join('');
-}
+    container.innerHTML = sorted.map(item => `
+      <div class="list-item" data-id="${item.id}">
+        <div class="item-name">${escapeHtml(item.name)}</div>
+        <div class="item-qty">
+          <button onclick="changeQty('${item.id}', -1)">-1</button>
+          <input type="number" id="qty-${item.id}" value="${item.qty}" min="1" max="99999" step="1" onchange="updateQty('${item.id}', this.value)">
+          <button onclick="changeQty('${item.id}', 1)">+1</button>
+        </div>
+        <div class="item-delete">
+          <button onclick="deleteItem('${item.id}')">✖ DELETE</button>
+        </div>
+      </div>
+    `).join('');
 
-function setCat(cat) { currentCat = cat; renderCats(); renderGrid(); }
+    // Calculate totals
+    const totalItems = list.length;
+    const totalQty = list.reduce((sum, i) => sum + i.qty, 0);
+    summaryDiv.innerHTML = `<span>📋 Distinct items: ${totalItems}</span><span>🧱 Total quantity: ${totalQty}</span>`;
+  }
 
-function renderGrid() {
-  const q = document.getElementById('search').value.toLowerCase();
-  let items = MC_ITEMS[currentCat] || [];
-  if(q) items = items.filter(n => n.toLowerCase().includes(q));
-  const list = getList();
-  document.getElementById('mc-grid').innerHTML = items.length
-    ? items.map(name => {
-        const inList = list.find(i => i.name === name);
-        const isSel = selected === name;
-        return `<div class="mc-block${isSel?' selected':''}" onclick='selectItem(${JSON.stringify(name)})'>
-          <span>${name}</span>
-          ${inList ? `<span class="badge" style="display:inline-block">✔</span>` : ''}
-        </div>`;
-      }).join('')
-    : '<div class="empty">No results found.</div>';
-}
+  // Change quantity by delta
+  function changeQty(id, delta) {
+    const list = getList();
+    const item = list.find(i => i.id === id);
+    if (item) {
+      let newQty = item.qty + delta;
+      if (newQty < 1) newQty = 1;
+      if (newQty > 99999) newQty = 99999;
+      item.qty = newQty;
+      saveList(list);
+      renderTodoList();
+    }
+  }
 
-function selectItem(name) {
-  selected = name;
-  document.getElementById('tray-name').textContent = name;
-  renderGrid();
-}
+  // Update quantity from input field
+  function updateQty(id, newVal) {
+    let qty = parseInt(newVal);
+    if (isNaN(qty) || qty < 1) qty = 1;
+    if (qty > 99999) qty = 99999;
+    const list = getList();
+    const item = list.find(i => i.id === id);
+    if (item) {
+      item.qty = qty;
+      saveList(list);
+      renderTodoList();
+    }
+  }
 
-function clearSearch() {
-  document.getElementById('search').value = '';
-  renderGrid();
-}
+  // Delete single item
+  function deleteItem(id) {
+    let list = getList();
+    list = list.filter(i => i.id !== id);
+    saveList(list);
+    renderTodoList();
+  }
 
-function addToList() {
-  if(!selected) { alert('Please select a block first!'); return; }
-  const qty = Math.max(1, parseInt(document.getElementById('qty').value)||1);
-  const list = getList();
-  const existing = list.find(i => i.name === selected);
-  if(existing) { existing.qty += qty; }
-  else { list.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2), name: selected, qty }); }
-  saveList(list);
-  updateFab();
-  renderGrid();
-  // Flash feedback
-  const btn = document.querySelector('.btn.green');
-  btn.textContent = '✔ ADDED!';
-  setTimeout(() => { btn.textContent = '＋ ADD TO LIST'; }, 1000);
-}
+  // Clear entire list
+  function clearAll() {
+    if (confirm('⚠️ Remove ALL items from your list? This cannot be undone.')) {
+      saveList([]);
+      renderTodoList();
+    }
+  }
 
-function updateFab() {
-  document.getElementById('fab-count').textContent = getList().length;
-}
+  // Navigate back to main selector
+  function goBack() {
+    location.href = 'index.html';
+  }
 
-function openTodo() {
-  location.href = 'todo.html';
-}
+  // Simple escape to prevent XSS (though item names are safe, good practice)
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
 
-renderCats();
-renderGrid();
-updateFab();
+  // Initial render
+  renderTodoList();
 </script>
 </body>
 </html>
