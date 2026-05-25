@@ -263,7 +263,8 @@ function clearSearch() {
 
 function addToList() {
   if(!selected) { alert('Please select a block first!'); return; }
-  const qty = Math.max(1, parseInt(document.getElementById('qty').value)||1);
+  let qty = parseInt(document.getElementById('qty').value);
+  if (isNaN(qty) || qty < 1) qty = 1;
   const list = getList();
   const existing = list.find(i => i.name === selected);
   if(existing) { existing.qty += qty; }
