@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Minecraft List</title>
+<title>Your Minecraft List – Stacks View</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
   :root {
@@ -32,39 +32,93 @@
   }
   .btn:active { transform:translate(2px,2px); box-shadow:none; }
   .btn.gold { background:#8a6200; border-color:#5a4000; }
-  .btn.green { background:var(--checked); border-color:#2a5c20; }
   .btn.danger { background:var(--danger); border-color:#5a1a1a; }
 
   .list-panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
-  .list-header {
-    display: grid; grid-template-columns: 3fr 1fr 0.5fr; gap: 8px; padding: 8px 12px;
-    background: #1a1208; border-bottom: 2px solid var(--border); font-family: 'Press Start 2P', monospace;
-    font-size: 8px; color: var(--gold); margin-bottom: 8px;
+
+  /* item card style – like the "Exterior Materials" list */
+  .item-card {
+    background: #1a1408;
+    border: 2px solid #333;
+    margin-bottom: 8px;
+    padding: 12px 16px;
+    transition: all 0.1s;
   }
-  .list-item {
-    display: grid; grid-template-columns: 3fr 1fr 0.5fr; gap: 8px; align-items: center;
-    background: #1a1408; border: 1px solid #333; padding: 10px 12px; margin-bottom: 4px;
+  .item-card:hover { border-color: var(--gold); background: #221e10; }
+
+  .item-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .item-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .item-numbers {
     font-size: 20px;
+    color: #ddd;
   }
-  .item-name { color: var(--text); word-break: break-word; }
-  .item-qty { display: flex; gap: 6px; align-items: center; justify-content: center; }
-  .item-qty input { width: 70px; background:#111; border:2px solid var(--border); color:var(--gold);
-    padding: 5px; font-family:'VT323',monospace; font-size: 18px; text-align: center; }
-  .item-qty button, .item-delete button {
-    background: #2a2a1a; border: 2px solid #5a5a3a; color: #ddd; font-size: 14px; font-weight: bold;
-    cursor: pointer; padding: 4px 8px; font-family: monospace;
+  .item-numbers strong {
+    color: var(--grass);
+    font-weight: bold;
   }
-  .item-delete button { background: #4a1a1a; border-color: #7a2a2a; }
+  .stacks-info {
+    font-size: 20px;
+    background: #0a0a03;
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    border-left: 3px solid var(--gold);
+    color: #ffe0a3;
+  }
+  .item-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #4a3a1a;
+  }
+  .ctrl-btn {
+    background: #2a2a1a;
+    border: 2px solid #5a5a3a;
+    color: #eee;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 12px;
+    font-family: monospace;
+    transition: 0.05s linear;
+  }
+  .ctrl-btn:active { transform: scale(0.96); }
+  .ctrl-btn.del { background: #5a1a1a; border-color: #8a3a3a; }
+  .qty-input {
+    width: 85px;
+    background: #111;
+    border: 2px solid var(--border);
+    color: var(--gold);
+    padding: 6px 8px;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    text-align: center;
+  }
   .empty-list { text-align: center; padding: 40px; font-size: 24px; color: #666; }
   .list-summary {
     margin-top: 16px; padding: 12px; background: #1a1208; border: 2px solid var(--border);
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     font-size: 20px;
   }
-  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-  @media (max-width: 550px) {
-    .list-header, .list-item { grid-template-columns: 2fr 1.2fr 0.8fr; gap: 6px; }
-    .item-qty input { width: 55px; font-size: 16px; }
+  @media (max-width: 600px) {
+    .item-details { flex-direction: column; align-items: flex-start; }
+    .stacks-info { align-self: flex-start; }
   }
 </style>
 </head>
@@ -73,7 +127,7 @@
 <div class="container">
   <header>
     <h1>📦 YOUR MINECRAFT LIST</h1>
-    <div class="subtitle">Manage your collected items</div>
+    <div class="subtitle">Stack‑optimised view – 64 items per stack</div>
   </header>
 
   <div class="top-bar">
@@ -81,12 +135,7 @@
     <button class="btn danger" onclick="clearAll()">🗑 CLEAR ALL</button>
   </div>
 
-  <div class="list-panel">
-    <div class="list-header">
-      <div>ITEM</div>
-      <div>QUANTITY</div>
-      <div>ACTION</div>
-    </div>
+  <div class="list-panel" id="list-panel">
     <div id="list-container"></div>
   </div>
 
@@ -94,43 +143,70 @@
 </div>
 
 <script>
+  // Stack size = 64 (Minecraft standard for almost all building blocks)
+  const STACK_SIZE = 64;
+
   // Helper functions (same storage key as index.html)
   function getList() { return JSON.parse(localStorage.getItem('mc-todo-v3') || '[]'); }
   function saveList(list) { localStorage.setItem('mc-todo-v3', JSON.stringify(list)); }
 
-  // Render the list
+  // Format quantity into "X stacks + Y" string
+  function formatStacks(quantity) {
+    const stacks = Math.floor(quantity / STACK_SIZE);
+    const remainder = quantity % STACK_SIZE;
+    if (stacks === 0) return `0 stacks + ${remainder}`;
+    if (remainder === 0) return `${stacks} stacks`;
+    return `${stacks} stacks + ${remainder}`;
+  }
+
+  // Render the list with beautiful stacks display
   function renderTodoList() {
     const list = getList();
     const container = document.getElementById('list-container');
     const summaryDiv = document.getElementById('list-summary');
 
     if (!list.length) {
-      container.innerHTML = '<div class="empty-list">⛏ No items added yet. Go back and select some!</div>';
-      summaryDiv.innerHTML = '<span>Total distinct items: 0</span><span>Total quantity: 0</span>';
+      container.innerHTML = '<div class="empty-list">⛏ No items added yet.<br>Go back and select some!</div>';
+      summaryDiv.innerHTML = '<span>📋 Distinct items: 0</span><span>🧱 Total quantity: 0</span>';
       return;
     }
 
     // Sort alphabetically by name
     const sorted = [...list].sort((a,b) => a.name.localeCompare(b.name));
 
-    container.innerHTML = sorted.map(item => `
-      <div class="list-item" data-id="${item.id}">
-        <div class="item-name">${escapeHtml(item.name)}</div>
-        <div class="item-qty">
-          <button onclick="changeQty('${item.id}', -1)">-1</button>
-          <input type="number" id="qty-${item.id}" value="${item.qty}" min="1" max="99999" step="1" onchange="updateQty('${item.id}', this.value)">
-          <button onclick="changeQty('${item.id}', 1)">+1</button>
+    container.innerHTML = sorted.map(item => {
+      const stacksStr = formatStacks(item.qty);
+      return `
+        <div class="item-card" data-id="${item.id}">
+          <div class="item-name">${escapeHtml(item.name)}</div>
+          <div class="item-details">
+            <div class="item-numbers">
+              <strong>${item.qty}</strong> items
+            </div>
+            <div class="stacks-info">
+              📦 ${stacksStr}
+            </div>
+          </div>
+          <div class="item-controls">
+            <button class="ctrl-btn" onclick="changeQty('${item.id}', -1)">-1</button>
+            <input type="number" id="qty-${item.id}" value="${item.qty}" min="1" max="99999" step="1" class="qty-input" onchange="updateQty('${item.id}', this.value)">
+            <button class="ctrl-btn" onclick="changeQty('${item.id}', 1)">+1</button>
+            <button class="ctrl-btn del" onclick="deleteItem('${item.id}')">✖ DELETE</button>
+          </div>
         </div>
-        <div class="item-delete">
-          <button onclick="deleteItem('${item.id}')">✖ DELETE</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Calculate totals
     const totalItems = list.length;
     const totalQty = list.reduce((sum, i) => sum + i.qty, 0);
-    summaryDiv.innerHTML = `<span>📋 Distinct items: ${totalItems}</span><span>🧱 Total quantity: ${totalQty}</span>`;
+    const totalStacks = Math.floor(totalQty / STACK_SIZE);
+    const totalRemainder = totalQty % STACK_SIZE;
+    summaryDiv.innerHTML = `
+      <span>📋 Distinct items: ${totalItems}</span>
+      <span>🧱 Total quantity: ${totalQty}</span>
+      <span>📦 Total stacks: ${totalStacks} stacks + ${totalRemainder}</span>
+    `;
   }
 
   // Change quantity by delta
@@ -182,15 +258,13 @@
     location.href = 'index.html';
   }
 
-  // Simple escape to prevent XSS (though item names are safe, good practice)
+  // Simple escape to prevent XSS (though item names are safe)
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, function(m) {
       if (m === '&') return '&amp;';
       if (m === '<') return '&lt;';
       if (m === '>') return '&gt;';
       return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-      return c;
     });
   }
 
