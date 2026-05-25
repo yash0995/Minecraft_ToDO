@@ -214,7 +214,80 @@ const MC_ITEMS = {
   ],
 };
 
-// Build All
+// Build All category
 const allItems = [];
 Object.entries(MC_ITEMS).forEach(([cat,arr]) => { if(cat!=="⭐ All") allItems.push(...arr); });
-MC_ITEMS["⭐ All"] = [...
+MC_ITEMS["⭐ All"] = [...new Set(allItems)].sort();
+
+let selected = null;
+let currentCat = "⭐ All";
+
+function getList() { return JSON.parse(localStorage.getItem('mc-todo-v3') || '[]'); }
+function saveList(list) { localStorage.setItem('mc-todo-v3', JSON.stringify(list)); }
+
+function renderCats() {
+  document.getElementById('cat-row').innerHTML = Object.keys(MC_ITEMS).map(c =>
+    `<div class="cat-tab${c===currentCat?' active':''}" onclick='setCat(${JSON.stringify(c)})'>${c}</div>`
+  ).join('');
+}
+
+function setCat(cat) { currentCat = cat; renderCats(); renderGrid(); }
+
+function renderGrid() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let items = MC_ITEMS[currentCat] || [];
+  if(q) items = items.filter(n => n.toLowerCase().includes(q));
+  const list = getList();
+  document.getElementById('mc-grid').innerHTML = items.length
+    ? items.map(name => {
+        const inList = list.find(i => i.name === name);
+        const isSel = selected === name;
+        return `<div class="mc-block${isSel?' selected':''}" onclick='selectItem(${JSON.stringify(name)})'>
+          <span>${name}</span>
+          ${inList ? `<span class="badge" style="display:inline-block">✔</span>` : ''}
+        </div>`;
+      }).join('')
+    : '<div class="empty">No results found.</div>';
+}
+
+function selectItem(name) {
+  selected = name;
+  document.getElementById('tray-name').textContent = name;
+  renderGrid();
+}
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  renderGrid();
+}
+
+function addToList() {
+  if(!selected) { alert('Please select a block first!'); return; }
+  const qty = Math.max(1, parseInt(document.getElementById('qty').value)||1);
+  const list = getList();
+  const existing = list.find(i => i.name === selected);
+  if(existing) { existing.qty += qty; }
+  else { list.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2), name: selected, qty }); }
+  saveList(list);
+  updateFab();
+  renderGrid();
+  // Flash feedback
+  const btn = document.querySelector('.btn.green');
+  btn.textContent = '✔ ADDED!';
+  setTimeout(() => { btn.textContent = '＋ ADD TO LIST'; }, 1000);
+}
+
+function updateFab() {
+  document.getElementById('fab-count').textContent = getList().length;
+}
+
+function openTodo() {
+  location.href = 'minecraft-todo.html';
+}
+
+renderCats();
+renderGrid();
+updateFab();
+</script>
+</body>
+</html>
