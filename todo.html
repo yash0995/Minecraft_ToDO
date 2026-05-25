@@ -19,9 +19,15 @@
     background-size:32px 32px; min-height:100vh; font-family:'VT323',monospace; color:var(--text); padding:16px;
   }
   .container { max-width:960px; margin:0 auto; }
-  header { text-align:center; margin-bottom:16px; padding:16px; background:var(--panel); border:4px solid var(--border); box-shadow:6px 6px 0 #000; position:relative; }
+  header { text-align:center; margin-bottom:16px; padding:16px; background:var(--panel); border:4px solid var(--border); box-shadow:6px 6px 0 #000; transition: box-shadow 0.2s; }
+  header:hover { box-shadow:8px 8px 0 #000; }
   header::before { content:''; position:absolute; inset:3px; border:2px solid rgba(255,255,255,0.07); pointer-events:none; }
-  h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; }
+  h1 { font-family:'Press Start 2P',monospace; font-size:clamp(9px,2.8vw,17px); color:var(--gold); text-shadow:3px 3px 0 #7a5a00; letter-spacing:2px; line-height:1.7; animation: glowPulse 3s infinite; }
+  @keyframes glowPulse {
+    0% { text-shadow: 3px 3px 0 #7a5a00; }
+    50% { text-shadow: 3px 3px 8px #ffcc44; }
+    100% { text-shadow: 3px 3px 0 #7a5a00; }
+  }
   .subtitle { font-size:19px; color:#aaa; margin-top:4px; }
 
   .top-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; justify-content: space-between; }
@@ -29,23 +35,40 @@
     background:var(--wood); border:3px solid #7a4e1a; border-bottom-color:#5a3010; border-right-color:#5a3010;
     color:#fff; padding:8px 14px; font-family:'Press Start 2P',monospace; font-size:7px; cursor:pointer;
     box-shadow:2px 2px 0 #000; white-space:nowrap; text-decoration: none; display: inline-block;
+    transition: all 0.05s linear;
   }
   .btn:active { transform:translate(2px,2px); box-shadow:none; }
   .btn.gold { background:#8a6200; border-color:#5a4000; }
   .btn.danger { background:var(--danger); border-color:#5a1a1a; }
+  .btn:hover { filter: brightness(1.1); }
 
   .list-panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
 
-  /* Item card – checklist style */
+  /* Item card – with animations */
   .item-card {
     background: #1a1408;
     border: 2px solid #333;
     margin-bottom: 10px;
     padding: 12px 16px;
-    transition: all 0.1s;
+    transition: all 0.2s ease-in-out;
+    animation: cardFadeIn 0.2s ease-out;
+    transform-origin: top;
   }
-  .item-card:hover { border-color: var(--gold); background: #221e10; }
-  .item-card.collected { background: #1a2a1a; border-color: var(--grass); opacity: 0.85; }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .item-card:hover {
+    border-color: var(--gold);
+    background: #221e10;
+    transform: translateX(4px);
+  }
+  .item-card.collected {
+    background: #1a2a1a;
+    border-color: var(--grass);
+    opacity: 0.85;
+    transition: all 0.3s;
+  }
 
   .item-header {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -64,7 +87,9 @@
   }
   .collected-check input {
     width: 22px; height: 22px; cursor: pointer; accent-color: var(--grass);
+    transition: transform 0.1s;
   }
+  .collected-check input:active { transform: scale(0.9); }
 
   .item-details {
     display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
@@ -85,18 +110,31 @@
   .ctrl-btn {
     background: #2a2a1a; border: 2px solid #5a5a3a; color: #eee; font-size: 18px;
     font-weight: bold; cursor: pointer; padding: 4px 12px; font-family: monospace;
+    transition: all 0.05s linear;
   }
-  .ctrl-btn:active { transform: scale(0.96); }
+  .ctrl-btn:active { transform: scale(0.94); }
   .ctrl-btn.del { background: #5a1a1a; border-color: #8a3a3a; }
+  .ctrl-btn:hover { filter: brightness(1.2); }
   .qty-input {
     width: 85px; background: #111; border: 2px solid var(--border); color: var(--gold);
     padding: 6px 8px; font-family: 'VT323', monospace; font-size: 20px; text-align: center;
+    transition: border 0.2s, box-shadow 0.2s;
   }
-  .empty-list { text-align: center; padding: 40px; font-size: 24px; color: #666; }
+  .qty-input:focus { border-color: var(--gold); box-shadow: 0 0 5px gold; outline: none; }
+  .empty-list { text-align: center; padding: 40px; font-size: 24px; color: #666; animation: fadeIn 0.3s; }
   .list-summary {
     margin-top: 16px; padding: 12px; background: #1a1208; border: 2px solid var(--border);
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     font-size: 20px;
+    transition: background 0.2s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes qtyFlash {
+    0% { background: #3a5a2a; }
+    100% { background: #1a1408; }
+  }
+  .qty-flash {
+    animation: qtyFlash 0.25s ease;
   }
   @media (max-width: 650px) {
     .item-details { flex-direction: column; align-items: flex-start; }
@@ -138,6 +176,12 @@
     return `${stacks} stacks + ${remainder}`;
   }
 
+  function animateQtyChange(element) {
+    if (!element) return;
+    element.classList.add('qty-flash');
+    setTimeout(() => element.classList.remove('qty-flash'), 250);
+  }
+
   function renderTodoList() {
     let list = getList();
     const container = document.getElementById('list-container');
@@ -149,7 +193,6 @@
       return;
     }
 
-    // Sort: uncollected first, then alphabetically
     const sorted = [...list].sort((a,b) => {
       if (a.collected !== b.collected) return a.collected ? 1 : -1;
       return a.name.localeCompare(b.name);
@@ -169,7 +212,7 @@
           </div>
           <div class="item-details">
             <div class="item-numbers">
-              <strong>${item.qty}</strong> items
+              <strong id="qty-val-${item.id}">${item.qty}</strong> items
             </div>
             <div class="stacks-info">
               📦 ${stacksStr}
@@ -217,6 +260,9 @@
       item.qty = newQty;
       saveList(list);
       renderTodoList();
+      // Animate the quantity display
+      const qtySpan = document.getElementById(`qty-val-${id}`);
+      if (qtySpan) animateQtyChange(qtySpan.parentElement);
     }
   }
 
@@ -230,6 +276,8 @@
       item.qty = qty;
       saveList(list);
       renderTodoList();
+      const input = document.getElementById(`qty-${id}`);
+      if (input) animateQtyChange(input);
     }
   }
 
