@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Minecraft List – Stacks View</title>
+<title>Your Minecraft Checklist</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
   :root {
@@ -36,79 +36,61 @@
 
   .list-panel { background:var(--panel); border:3px solid var(--border); padding:14px; box-shadow:6px 6px 0 #000; }
 
-  /* item card style – like the "Exterior Materials" list */
+  /* Item card – checklist style */
   .item-card {
     background: #1a1408;
     border: 2px solid #333;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     padding: 12px 16px;
     transition: all 0.1s;
   }
   .item-card:hover { border-color: var(--gold); background: #221e10; }
+  .item-card.collected { background: #1a2a1a; border-color: var(--grass); opacity: 0.85; }
 
+  .item-header {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
   .item-name {
     font-family: 'Press Start 2P', monospace;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--gold);
-    margin-bottom: 6px;
     letter-spacing: 1px;
+    flex: 2;
   }
+  .collected-check {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 18px; cursor: pointer;
+  }
+  .collected-check input {
+    width: 22px; height: 22px; cursor: pointer; accent-color: var(--grass);
+  }
+
   .item-details {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-    margin-top: 6px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+    gap: 8px; margin-top: 6px;
   }
   .item-numbers {
-    font-size: 20px;
-    color: #ddd;
+    font-size: 20px; color: #ddd;
   }
-  .item-numbers strong {
-    color: var(--grass);
-    font-weight: bold;
-  }
+  .item-numbers strong { color: var(--grass); font-weight: bold; }
   .stacks-info {
-    font-size: 20px;
-    background: #0a0a03;
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 4px;
-    border-left: 3px solid var(--gold);
-    color: #ffe0a3;
+    font-size: 20px; background: #0a0a03; padding: 2px 10px;
+    border-radius: 4px; border-left: 3px solid var(--gold); color: #ffe0a3;
   }
   .item-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px dashed #4a3a1a;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    margin-top: 12px; padding-top: 8px; border-top: 1px dashed #4a3a1a;
   }
   .ctrl-btn {
-    background: #2a2a1a;
-    border: 2px solid #5a5a3a;
-    color: #eee;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 4px 12px;
-    font-family: monospace;
-    transition: 0.05s linear;
+    background: #2a2a1a; border: 2px solid #5a5a3a; color: #eee; font-size: 18px;
+    font-weight: bold; cursor: pointer; padding: 4px 12px; font-family: monospace;
   }
   .ctrl-btn:active { transform: scale(0.96); }
   .ctrl-btn.del { background: #5a1a1a; border-color: #8a3a3a; }
   .qty-input {
-    width: 85px;
-    background: #111;
-    border: 2px solid var(--border);
-    color: var(--gold);
-    padding: 6px 8px;
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    text-align: center;
+    width: 85px; background: #111; border: 2px solid var(--border); color: var(--gold);
+    padding: 6px 8px; font-family: 'VT323', monospace; font-size: 20px; text-align: center;
   }
   .empty-list { text-align: center; padding: 40px; font-size: 24px; color: #666; }
   .list-summary {
@@ -116,7 +98,7 @@
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     font-size: 20px;
   }
-  @media (max-width: 600px) {
+  @media (max-width: 650px) {
     .item-details { flex-direction: column; align-items: flex-start; }
     .stacks-info { align-self: flex-start; }
   }
@@ -126,8 +108,8 @@
 
 <div class="container">
   <header>
-    <h1>📦 YOUR MINECRAFT LIST</h1>
-    <div class="subtitle">Stack‑optimised view – 64 items per stack</div>
+    <h1>📋 MINECRAFT CHECKLIST</h1>
+    <div class="subtitle">✔ mark collected items – 64 items per stack</div>
   </header>
 
   <div class="top-bar">
@@ -135,7 +117,7 @@
     <button class="btn danger" onclick="clearAll()">🗑 CLEAR ALL</button>
   </div>
 
-  <div class="list-panel" id="list-panel">
+  <div class="list-panel">
     <div id="list-container"></div>
   </div>
 
@@ -143,14 +125,11 @@
 </div>
 
 <script>
-  // Stack size = 64 (Minecraft standard for almost all building blocks)
   const STACK_SIZE = 64;
 
-  // Helper functions (same storage key as index.html)
   function getList() { return JSON.parse(localStorage.getItem('mc-todo-v3') || '[]'); }
   function saveList(list) { localStorage.setItem('mc-todo-v3', JSON.stringify(list)); }
 
-  // Format quantity into "X stacks + Y" string
   function formatStacks(quantity) {
     const stacks = Math.floor(quantity / STACK_SIZE);
     const remainder = quantity % STACK_SIZE;
@@ -159,26 +138,35 @@
     return `${stacks} stacks + ${remainder}`;
   }
 
-  // Render the list with beautiful stacks display
   function renderTodoList() {
-    const list = getList();
+    let list = getList();
     const container = document.getElementById('list-container');
     const summaryDiv = document.getElementById('list-summary');
 
     if (!list.length) {
       container.innerHTML = '<div class="empty-list">⛏ No items added yet.<br>Go back and select some!</div>';
-      summaryDiv.innerHTML = '<span>📋 Distinct items: 0</span><span>🧱 Total quantity: 0</span>';
+      summaryDiv.innerHTML = '<span>📋 Distinct items: 0</span><span>🧱 Total quantity: 0</span><span>📦 Total stacks: 0</span>';
       return;
     }
 
-    // Sort alphabetically by name
-    const sorted = [...list].sort((a,b) => a.name.localeCompare(b.name));
+    // Sort: uncollected first, then alphabetically
+    const sorted = [...list].sort((a,b) => {
+      if (a.collected !== b.collected) return a.collected ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
 
     container.innerHTML = sorted.map(item => {
       const stacksStr = formatStacks(item.qty);
+      const collectedClass = item.collected ? 'collected' : '';
       return `
-        <div class="item-card" data-id="${item.id}">
-          <div class="item-name">${escapeHtml(item.name)}</div>
+        <div class="item-card ${collectedClass}" data-id="${item.id}">
+          <div class="item-header">
+            <div class="item-name">${escapeHtml(item.name)}</div>
+            <label class="collected-check">
+              <input type="checkbox" ${item.collected ? 'checked' : ''} onchange="toggleCollected('${item.id}', this.checked)">
+              <span>Collected</span>
+            </label>
+          </div>
           <div class="item-details">
             <div class="item-numbers">
               <strong>${item.qty}</strong> items
@@ -197,19 +185,28 @@
       `;
     }).join('');
 
-    // Calculate totals
     const totalItems = list.length;
     const totalQty = list.reduce((sum, i) => sum + i.qty, 0);
     const totalStacks = Math.floor(totalQty / STACK_SIZE);
     const totalRemainder = totalQty % STACK_SIZE;
+    const collectedCount = list.filter(i => i.collected).length;
     summaryDiv.innerHTML = `
-      <span>📋 Distinct items: ${totalItems}</span>
+      <span>📋 Items: ${totalItems} (${collectedCount} collected)</span>
       <span>🧱 Total quantity: ${totalQty}</span>
       <span>📦 Total stacks: ${totalStacks} stacks + ${totalRemainder}</span>
     `;
   }
 
-  // Change quantity by delta
+  function toggleCollected(id, isChecked) {
+    const list = getList();
+    const item = list.find(i => i.id === id);
+    if (item) {
+      item.collected = isChecked;
+      saveList(list);
+      renderTodoList();
+    }
+  }
+
   function changeQty(id, delta) {
     const list = getList();
     const item = list.find(i => i.id === id);
@@ -223,7 +220,6 @@
     }
   }
 
-  // Update quantity from input field
   function updateQty(id, newVal) {
     let qty = parseInt(newVal);
     if (isNaN(qty) || qty < 1) qty = 1;
@@ -237,7 +233,6 @@
     }
   }
 
-  // Delete single item
   function deleteItem(id) {
     let list = getList();
     list = list.filter(i => i.id !== id);
@@ -245,7 +240,6 @@
     renderTodoList();
   }
 
-  // Clear entire list
   function clearAll() {
     if (confirm('⚠️ Remove ALL items from your list? This cannot be undone.')) {
       saveList([]);
@@ -253,12 +247,10 @@
     }
   }
 
-  // Navigate back to main selector
   function goBack() {
     location.href = 'index.html';
   }
 
-  // Simple escape to prevent XSS (though item names are safe)
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, function(m) {
       if (m === '&') return '&amp;';
@@ -268,7 +260,6 @@
     });
   }
 
-  // Initial render
   renderTodoList();
 </script>
 </body>
